@@ -3,21 +3,32 @@
 """
 Created on Sun Aug 13 08:26:18 2023
 
-@author: jason
+@author: jason, contact: jeb at geus.dk
+
+
+Greenland monthly temperature reconstruction 1840 to 2022
+
+after
+
+Box, J. E., Yang, L., Bromwich, D. H., and Bai, L. S.: Greenland ice sheet surface air temperature variability: 1840–2007, J. Clim., 2009.
+
+updated in
+
+Box, J. E.: Greenland ice sheet mass balance reconstruction. Part II: Surface mass balance (1840–2010), J. Clim., 2013.
+
+updated after
+
+Kjeldsen, K. K., Korsgaard, N. J., Bjørk, A. A., Khan, S. A., Box, J. E., Funder, S., Larsen, N. K., Bamber, J. L., Colgan, W., van den Broeke, M., Siggaard-Andersen, M.-L., Nuth, C., Schomacker, A., Andresen, C. S., Willerslev, E., and Kjær, K. H.: Spatial and temporal distribution of mass loss from the Greenland Ice Sheet since AD 1900, Nature, 528, 396–400, https://doi.org/10.1038/nature16183, 2015.
+ 
+updated through 2022 by J Box, as yet unpublished, so be sure to contact me if using the work in a publication!
+
 """
 import matplotlib.pyplot as plt
-# from matplotlib import cm
-# from matplotlib.colors import ListedColormap, LinearSegmentedColormap
-# from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import os
-# from glob import glob
-# from netCDF4 import Dataset
-# from mpl_toolkits.basemap import Basemap
 import pandas as pd
-# from datetime import datetime 
 
-fs=22
+fs=22 # font size
 
 # plt.rcParams['font.sans-serif'] = ['Georgia']
 plt.rcParams['axes.facecolor'] = 'white'
@@ -26,8 +37,6 @@ plt.rcParams['axes.grid'] = True
 plt.rcParams['grid.alpha'] = 1
 plt.rcParams['grid.color'] = "grey"
 plt.rcParams["font.size"] = fs
-#params = {'legend.fontsize': 20,
-#          'legend.handlelength': 2}
 plt.rcParams['legend.fontsize'] = fs*0.8
 
 
@@ -43,11 +52,10 @@ years=np.arange(N_years)+iyear
 months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
                              'DJF','MAM','JJA','SON','ANN']    
 
-#%%
-
 outpaths=['/Users/jason/0_dat/']
 for outpath in outpaths:
-    fn=outpath+'T_recon_'+str(N_years)+'x'+str(N_months)+'x'+str(nj)+'x'+str(ni)+'.npy'
+    fn=outpath+'T_recon_'+str(N_years)+'x'+str(N_months)+'x'+str(nj)+'x'+str(ni)+'.npy' # data available from 
+    print(fn)
     print('reading')
     T = np.fromfile(fn, dtype='int16')
     # plt.plot(T)
@@ -62,7 +70,9 @@ plt.colorbar()
 plt.axis("off")
 plt.show()
 
-#%% means for ice sheet
+#%% means for ice sheet, already included in this github repository
+# already included in this github repository
+# already included in this github repository :-)
 
 def load_bin_img(ni,nj,filename,dtype):
     data = np.fromfile(filename, dtype=dtype, count=ni*nj)
@@ -72,7 +82,7 @@ def load_bin_img(ni,nj,filename,dtype):
     return array
 
 # mask
-mask=load_bin_img(ni,nj,'./meta/Greenland_ice_mask_fuzzy_v20091101_5km_GRIMICE_merged.img','>f')
+mask=load_bin_img(ni,nj,'/Users/jason/Dropbox/reconstructions_of_Greenland_T_and_Accumulation/ancil/Greenland_ice_mask_fuzzy_v20091101_5km_GRIMICE_merged.img','>f')
 v=np.where(mask<0.5)
 # mask[v]=np.nan
 # print(mask[v])
@@ -198,7 +208,7 @@ def statsx(x,y,namex):
 months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
                              'DJF','MAM','JJA','SON','ANN']    
 
-df=pd.read_csv('./stats/T_seasonal_reconstructed_1840_to_2022.csv')
+df=pd.read_csv('/Users/jason/Dropbox/reconstructions_of_Greenland_T_and_Accumulation/stats/T_seasonal_reconstructed_1840_to_2022.csv')
 
 for month in months:
     plt.close()
@@ -223,167 +233,3 @@ for month in months:
         os.system('mkdir -p '+figpath)
         figname=figpath+month
         plt.savefig(figname, bbox_inches='tight', dpi=150)
-        
-#%% comp with global
-
-df_recon=pd.read_csv('./stats/T_seasonal_reconstructed_1840_to_2022.csv')
-df_recon = df_recon.loc[ df_recon.year >1850 ]
-df_recon.reset_index(drop=True, inplace=True)
-
-df_recon = df_recon.loc[ df_recon.year <2021 ]
-df_recon.reset_index(drop=True, inplace=True)
-
-#%%
-# --------------------------------------------------------- Hadley Global
-iyear=1851
-dataset_name='HadCW04'
-dataset_name2='HadCRUT4/HadSST4, Cowtan and Way (2004)'
-year0_baseline=1851
-year1_baseline=1900
-fyear=2020
-n_years=fyear-iyear+1
-
-# global
-fn='/Users/jason/Dropbox/Arctic_vs_global_SAT/HadCRUT4/ihad4_krig_v2_0-360E_-90-90N_n_0p.dat.txt'
-df=pd.read_csv(fn,skiprows=21, delim_whitespace=True)
-# n=1 # drops incomplete 2021
-# df.drop(df.tail(n).index,inplace=True) # drop last n rows
-    
-means=np.zeros(n_years)
-
-select_months=[0,1,2,3,4,5,6,7,8,9,10,11]
-season_name='annual'
-season_name2='annual'
-
-select_months=np.asarray(select_months)
-select_months+=1
-
-z=np.asarray(df)
-# estimate missing months using avereage of pervious N years
-for i in range(12):
-    temp=z[:,i+1]
-    v=[temp<-990]
-    if np.sum(v):
-        # print(i,np.mean(temp[-5:-1]))#np.mean())
-        z[-1,i+1]=np.mean(temp[-2:-1])
-
-# end estimate missing months using avereage of pervious N years
-z[n_years-1,12]=np.mean(z[n_years-12:n_years-2:,12])
-
-for yy in range(0,n_years):
-    # print()
-    means[yy]=np.mean(z[yy,select_months])
-    # print(yy+iyear,z[yy,select_months],len(z[yy,select_months]))
-    # ss
-
-x=np.arange(n_years)+iyear
-v=((x>=year0_baseline)&(x<=year1_baseline))
-y=means-np.mean(means[v])
-
-x_G_Had=x
-y_G_Had=y
-
-# --------------------------------------------------------- Hadley Arctic
-iyear=1851
-dataset_name='HadCW04'
-dataset_name2='HadCRUT4/HadSST4, Cowtan and Way (2004)'
-year0_baseline=1851
-year1_baseline=1900
-fyear=2021
-n_years=fyear-iyear+1
-
-fn='/Users/jason/Dropbox/Arctic_vs_global_SAT/HadCRUT4/ihad4_krig_v2_0-360E_65-90N_n_0p.dat.txt' # comment this out to obtain global changes
-df=pd.read_csv(fn,skiprows=21, delim_whitespace=True)
-df=pd.read_csv(fn,skiprows=21, delim_whitespace=True)
-# n=1 # drops incomplete 2021
-# df.drop(df.tail(n).index,inplace=True) # drop last n rows
-
-
-means=np.zeros((3,n_years))
-
-for j,select_month in enumerate(range(0,3)):
-    # if j>=0:
-    if j==2:
-        if select_month==0:
-            select_months=[0,1,2,3,4,9,10,11]
-            season_name='freeze-up season Oct-May'
-            season_name2='cold'
-        if select_month==1:
-            select_months=[5,6,7,8]
-            season_name='melt season Jun-Sept'
-            season_name2='warm'
-        if select_month==2:
-            select_months=[0,1,2,3,4,5,6,7,8,9,10,11]
-            season_name='annual'
-            season_name2='annual'
-    
-        select_months=np.asarray(select_months)
-        select_months+=1
-        
-        z=np.asarray(df)
-        # estimate missing months using avereage of pervious N years
-        for i in range(12):
-            temp=z[:,i+1]
-            v=[temp<-990]
-            if np.sum(v):
-                # print(i,np.mean(temp[-5:-1]))#np.mean())
-                z[-1,i+1]=np.mean(temp[-2:-1])
-                z[n_years-1,12]=np.mean(z[n_years-12:n_years-2:,12])
-        # end estimate missing months using avereage of pervious N years
-        z[n_years-1,12]=np.mean(z[n_years-12:n_years-2:,12])
-        for yy in range(0,n_years):
-            # print()
-            means[j,yy]=np.mean(z[yy,select_months])
-            # print(yy+iyear,z[yy,select_months],len(z[yy,select_months]))
-            # ss
-            
-        x=np.arange(n_years)+iyear
-        v=((x>=year0_baseline)&(x<=year1_baseline))
-        y=means[j,:]-np.mean(means[j,v])
-
-        x_A_Had=x
-        y_A_Had=y
-#%%
-
-def statsx(x,y,namex):
-    print()
-    print(namex)
-    T_2000_to_2015=np.nanmean(y[x>=2000])
-    T_1950to1981=np.nanmean(y[((x>1950)&(x<1981))])
-    T_1840to1900=np.nanmean(y[((x>=1840)&(x<=1900))])
-    
-    print('T anom 2000 to 2020 vs 1951 to 1980: %.1f'%T_2000_to_2015+' deg. C')
-    # print('1950 to 1981 %.1f'%T_1950to1981+' deg. C')
-    print('T anom 1851 to 1900 vs 1951 to 1980: %.1f'%T_1840to1900+' deg. C')
-    print('T anom (2000 to 2020) minus (1950 to 1981) %.1f'%(T_2000_to_2015-T_1950to1981)+' deg. C')
-    print('T anom (2000 to 2020) minus (1840 to 1900) %.1f'%(T_2000_to_2015-T_1840to1900)+' deg. C')
-    
-fig, ax = plt.subplots(figsize=(10,10))
-
-# ax.plot(x,y-np.nanmean(y[(x>=1951)&(x<=1980)]),'k',label=)
-# ax.plot(df_recon.year,df_recon.ANN-np.nanmean(df_recon.ANN[(df_recon.year>=1951)&(df_recon.year<=1980)]),'b',label='Box Greenland reconstruction Annual')
-
-label='HadCRUT4 global annual' ; co='k' ; y=y_G_Had-np.nanmean(y_G_Had[(x_G_Had>=1951)&(x_G_Had<=1980)])
-# ax.plot(x_G_Had,y,co)
-statsx(x_G_Had,y,label)
-lowesx(x_G_Had,y,co,label)
-
-label='HadCRUT4 Arctic annual' ; co='c' ; y=y_A_Had-np.nanmean(y_A_Had[(x_A_Had>=1951)&(x_A_Had<=1980)])
-# ax.plot(x_G_Had,y,co)
-statsx(x_A_Had,y,label)
-lowesx(x_A_Had,y,co,label)
-
-label='Box Greenland annual' ; co='b' ; y=df_recon.ANN-np.nanmean(df_recon.ANN[(df_recon.year>=1951)&(df_recon.year<=1980)])
-# ax.plot(df_recon.year,y,co)
-statsx(df_recon.year,y,label)
-lowesx(df_recon.year,y,co,label)
-
-label='Box Greenland JJA' ; co='r' ; y=df_recon.JJA-np.nanmean(df_recon.JJA[(df_recon.year>=1951)&(df_recon.year<=1980)])
-# ax.plot(df_recon.year,y,co)
-statsx(df_recon.year,y,label)
-lowesx(df_recon.year,y,co,label)
-
-ax.set_xlim(1850,2021)
-ax.set_title('1851 to 2020')
-ax.set_ylabel('°C anomaly relative to 1951 to 1980')
-ax.legend()

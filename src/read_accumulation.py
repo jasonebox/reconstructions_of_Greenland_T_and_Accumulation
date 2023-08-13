@@ -3,7 +3,7 @@
 """
 Created on Sun Aug 13 08:52:19 2023
 
-@author: jason
+@author: jason, contact: jeb at geus.dk
 
 read and display Greenland annual accumulation reconstruction 1840 to 1999 after
     Box, J. E., Cressie, N., Bromwich, D. H., Jung, J.-H., van den Broeke, M., van Angelen, J. H., Forster, R. R., Miège, C., Mosley-Thompson, E., Vinther, B., and McConnell, J. R.: Greenland Ice Sheet Mass Balance Reconstruction. Part I: Net Snow Accumulation (1600–2009), J. Clim., 26, 3919–3934, https://doi.org/10.1175/JCLI-D-12-00373.1, 2013.
