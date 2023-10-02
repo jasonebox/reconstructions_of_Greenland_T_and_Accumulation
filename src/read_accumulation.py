@@ -39,7 +39,7 @@ plt.colorbar()
 
 #%%
 fn='/Users/jason/Dropbox/recon_share/Box_Accumulation_1840-2012_301x561x173_cal.nc' # data from Box et al 2013 available from https://www.dropbox.com/scl/fi/hyj9hry8dlsjilpj10ju9/Box_Accumulation_1840-2012_301x561x173_cal.nc?rlkey=3bnlcvvua55vebg405irexdo2&dl=0
-fn='/Users/jason/Dropbox/recon_share/Box_Accumulation_1840-2012_301x561x173_cal_TIN.nc' # includes a triangular irregular network bias correction attempt, data from Lewis et al 2017 available from data from Box et al 2013 available from
+# fn='/Users/jason/Dropbox/recon_share/Box_Accumulation_1840-2012_301x561x173_cal_TIN.nc' # includes a triangular irregular network bias correction attempt, data from Lewis et al 2017 available from data from Box et al 2013 available from
 ds = xr.open_dataset(fn)
 
 # np.shape(ds.variables['tmp2m'])
@@ -53,6 +53,7 @@ C=np.array(ds.variables['acc'])
 years=np.array(ds.variables['time']).astype(int)
 mask=np.array(ds.variables['icemask'])
 mask=np.flipud(mask)
+
 
 #%% visualise mask
 # mask values below 1 mean user should multiply accumulation values by mask values to get sub-grid accumulation rate useful when making regional totals for mass balance estimation
@@ -69,3 +70,49 @@ plt.colorbar()
 plt.axis("off")
 plt.title(str(years[yy]))
 plt.show()
+
+#%% obtain time series
+
+accum=[]
+areax=5000**2
+
+for yy,year in enumerate(years):
+    if yy>=0:
+        print(year)
+        temp=np.flipud(C[yy,:,:])
+        temp[mask<0.5]=np.nan
+        temp2=np.nansum(temp)*areax/1e12
+        accum.append(temp2)
+        # print(temp)
+
+#%% output time series
+def lowesx(x,y):
+    # lowess will return our "smoothed" data with a y value for at every x-value
+    lowess = sm.nonparametric.lowess(y, x, frac=.05)
+    
+    # unpack the lowess smoothed points to their values
+    lowess_x = list(zip(*lowess))[0]
+    lowess_y = list(zip(*lowess))[1]
+    
+    # run scipy's interpolation. There is also extrapolation I believe
+    # f = interp1d(lowess_x, lowess_y, bounds_error=False)
+    
+    # xnew = [i/10. for i in range(400)]
+    
+    # this this generate y values for our xvalues by our interpolator
+    # it will MISS values outsite of the x window (less than 3, greater than 33)
+    # There might be a better approach, but you can run a for loop
+    #and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
+    # ynew = f(xnew)
+    
+    return lowess_y
+import statsmodels.api as sm
+
+accum=np.array(accum)
+
+plt.close()
+fig, ax = plt.subplots(figsize=(8,6))
+
+lowess_result=lowesx(years,accum)
+plt.plot(years,accum)
+ax.plot(years, lowess_result, '-',c='k',linewidth=3,label='smoothed')
