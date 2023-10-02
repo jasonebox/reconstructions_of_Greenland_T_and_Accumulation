@@ -34,7 +34,7 @@ updated after
 
  ## comparison to Box et al 2013
 
-![image](https://github.com/jasonebox/reconstructions_of_Greenland_T_and_Accumulation/assets/32133350/9a38a739-49b2-4532-bd80-2284e0f25d1e)
+![image](Figs/Greenland_accumulation_annual_timeseries_1840-1999.png)
 
 ![image](https://github.com/jasonebox/reconstructions_of_Greenland_T_and_Accumulation/assets/32133350/e1b17971-af54-4cc8-85de-19e3732e24a6)
 
