@@ -31,4 +31,22 @@ updated in
 updated after
 
     Kjeldsen, K. K., Korsgaard, N. J., Bjørk, A. A., Khan, S. A., Box, J. E., Funder, S., Larsen, N. K., Bamber, J. L., Colgan, W., van den Broeke, M., Siggaard-Andersen, M.-L., Nuth, C., Schomacker, A., Andresen, C. S., Willerslev, E., and Kjær, K. H.: Spatial and temporal distribution of mass loss from the Greenland Ice Sheet since AD 1900, Nature, 528, 396–400, https://doi.org/10.1038/nature16183, 2015.
- 
+
+ ## comparison to Box et al 2013
+
+![image](https://github.com/jasonebox/reconstructions_of_Greenland_T_and_Accumulation/assets/32133350/9a38a739-49b2-4532-bd80-2284e0f25d1e)
+
+![image](https://github.com/jasonebox/reconstructions_of_Greenland_T_and_Accumulation/assets/32133350/e1b17971-af54-4cc8-85de-19e3732e24a6)
+
+FIG. 6. Time series of total Greenland ice sheet snow accumulation
+based on the RACMO2 regional climate model and our
+statistical reconstruction. The annual reconstruction totals are
+smoothed with an 11-yr Gaussian filter to emphasize interdecadal
+variations. A light gray area indicates the 1.28s uncertainty envelope
+corresponding to 80% confidence. Green dashed lines indicate
+trend fits for a selection of periods (see Table 3) based on the unsmoothed
+totals. The right vertical axis is for the Andersen et al.
+(2006) data, which are normalized, offering values between zero
+and 1.
+
+
