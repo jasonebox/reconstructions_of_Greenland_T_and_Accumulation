@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xarray as xr
 
+os.chdir('/Users/jason/Dropbox/reconstructions_of_Greenland_T_and_Accumulation/')
+
 # latitude longitude data are in this file
 fn='/Users/jason/Dropbox/reconstructions_of_Greenland_T_and_Accumulation/ancil/5km_DEM_w_lat_lon.nc'
 ds = xr.open_dataset(fn)
@@ -88,7 +90,7 @@ for yy,year in enumerate(years):
 #%% output time series
 def lowesx(x,y):
     # lowess will return our "smoothed" data with a y value for at every x-value
-    lowess = sm.nonparametric.lowess(y, x, frac=.05)
+    lowess = sm.nonparametric.lowess(y, x, frac=.03)
     
     # unpack the lowess smoothed points to their values
     lowess_x = list(zip(*lowess))[0]
@@ -114,5 +116,30 @@ plt.close()
 fig, ax = plt.subplots(figsize=(8,6))
 
 lowess_result=lowesx(years,accum)
-plt.plot(years,accum)
+plt.plot(years,accum,label='annual accumulation')
 ax.plot(years, lowess_result, '-',c='k',linewidth=3,label='smoothed')
+plt.ylabel('Gt per year')
+out=pd.DataFrame({'year':years,
+      'accumulation_annual':accum,
+      'accumulation_annual_smoothed':lowess_result,
+      })
+ 
+vals=['accumulation_annual','accumulation_annual_smoothed']
+
+for val in vals:
+    out[val] = out[val].map(lambda x: '%.2f' % x)
+    
+print(out)
+
+out.to_csv('./stats/Greenland)accumulation_annual_timeseries_1840-1999.csv',index=None)
+ly='p'
+
+if ly == 'x':plt.show()
+
+fig_path='./Figs/'
+
+if ly == 'p':
+    plt.savefig('./Figs/Greenland)accumulation_annual_timeseries_1840-1999.png', 
+                bbox_inches='tight', dpi=150)
+    # if plt_eps:
+    #     plt.savefig(fig_path+site+'_'+str(i).zfill(2)+nam+'.eps', bbox_inches='tight')
